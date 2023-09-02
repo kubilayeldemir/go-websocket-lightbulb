@@ -104,7 +104,7 @@
          </svg>
 </div>
 <script>
-	const socket = new WebSocket("ws://ikeve.wiki/lightbulb");
+	const socket = new WebSocket("wss://ikeve.wiki/lightbulb");
 
 	socket.onopen = event => {
 		console.log("WebSocket connected", event);

@@ -55,18 +55,22 @@ func lightBulbHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		resMessage := SwitchLightBulbAndGetStateWithLock()
-		BroadcastNewLightBulbState(resMessage)
+		BroadcastNewLightBulbStateToAllClients(resMessage)
 	}
 }
 
-func BroadcastNewLightBulbState(resMessage []byte) {
+func BroadcastNewLightBulbStateToAllClients(resMessage []byte) {
 	clientsMutex.Lock()
 	for client := range clients {
-		if err := client.WriteMessage(websocket.TextMessage, resMessage); err != nil {
-			fmt.Println("Error writing message:", err)
-		}
+		go BroadcastNewLightBulbStateToClient(resMessage, client)
 	}
 	clientsMutex.Unlock()
+}
+
+func BroadcastNewLightBulbStateToClient(resMessage []byte, client *websocket.Conn) {
+	if err := client.WriteMessage(websocket.TextMessage, resMessage); err != nil {
+		fmt.Println("Error writing message:", err)
+	}
 }
 
 func DeleteClientFromConnectionsWithLock(c *websocket.Conn) {
